@@ -1,0 +1,96 @@
+- hosts : 127.0.0.1
+  connection: local
+  become: true 
+  become_method: sudo
+  vars:
+    devops_repo: https://bitbucket.org/azneita/devops-challenge.git
+    dest_path: /webapps/devops
+    logrotate_dir: /etc/logrotate.d
+  pre_tasks:
+  - name: Installing Python
+    raw: apt install python-minimal
+    changed_when: False
+  tasks:
+    - name: Install Required Dependency packages
+      apt:
+        name: '{{item}}'
+        state: present
+      with_items:
+        - git
+        - python-pip
+        - nginx
+        - supervisor
+
+#    - name: Create Destination Directory to clone the Devops Repo
+#      file:
+#        path: '{{dest_path}}'
+#        state: directory
+
+    - name: Clone the DevOps Repository under '{{dest_path}}'
+      git: 
+        repo: '{{devops_repo}}'
+        dest: '{{dest_path}}'
+
+    - name: Install Python Libraries for DevOps Challenge Flask Application
+      pip: requirements='{{dest_path}}/requirements.txt'
+
+    - name: Add supervisord configuration from supervisord template file
+      template:
+        src: supervisord_template.j2
+        dest: /etc/supervisor/supervisord.conf
+    
+    - name: Changing the Ownership to App path, Nginx and Supervisor
+      file:
+        dest='{{item}}'
+        owner=ubuntu
+        group=ubuntu
+        recurse=yes
+      with_items:
+        - /etc/supervisor
+        - /etc/nginx
+        - '{{dest_path}}'
+
+    - name: Reload the Supervisor configurations
+      service:
+        name: supervisor
+        state: reloaded
+      
+    - name: Start the Devops Challenge Flask application and Running on port 5000
+      supervisorctl:
+        name: flaskapp
+        state: started
+    
+    - name: Add rule to Forward the traffic from 5000 to nginx 80
+      template:
+        src: nginx_template.j2
+        dest: /etc/nginx/sites-enabled/nginx-flask
+        
+    - name: To Make Sure Nginx is Running
+      service:
+        name=nginx
+        state=started
+      become: yes
+      become_user: ubuntu
+
+    - name: Rotate the Logs for Nginx Service and Supervisor 
+      template:
+        src: '{{item}}'
+        dest: '{{logrotate_dir}}'
+      with_items:
+        - nginx_log_template.j2
+        - supervisor_log_template.j2
+
+    - name: Set UTC Timezone
+      timezone:
+        name: Europe/Rome
+        hwclock: UTC
+
+
+  handlers:
+    - name: restart nginx
+      service: 
+        name=nginx 
+        state=restarted
+      become: yes
+      become_user: ubuntu
+
