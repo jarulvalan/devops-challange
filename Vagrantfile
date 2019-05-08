@@ -12,7 +12,7 @@ Vagrant.configure(2) do |config|
         vb.customize ["modifyvm" , :id, "--cpuexecutioncap", "40"]
     end
     config.vm.provision "ansible" do |ansible|
-        ansible.playbook = "playbook.yml"
+        ansible.playbook = "devops_challenge.yml"
     end
 
 end

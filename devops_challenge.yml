@@ -72,17 +72,19 @@
       become: yes
       become_user: ubuntu
 
-    - name: Rotate the Logs for Nginx Service and Supervisor 
+    - name: Rotate the Logs for Nginx Service
       template:
-        src: '{{item}}'
-        dest: '{{logrotate_dir}}'
-      with_items:
-        - nginx_log_template.j2
-        - supervisor_log_template.j2
+        src: nginx_log_template.j2
+        dest: '{{logrotate_dir}}/nginx'
+
+    - name: Rotate the Logs for Flask App Supervisor
+      template:
+        src: supervisor_log_template.j2
+        dest: '{{logrotate_dir}}/supervisor'
 
     - name: Set UTC Timezone
       timezone:
-        name: Europe/Rome
+        name: UTC
         hwclock: UTC
 
 
