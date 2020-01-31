@@ -10,7 +10,7 @@ freeStyleJob("DevOps-Challenge")
     label("test")
     scm
     {
-        git($devops_git, "master")
+        git(devops_git, "master")
     }
     steps{
         sh echo "Running the steps1"
