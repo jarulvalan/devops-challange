@@ -12,9 +12,7 @@ freeStyleJob("DevOps-Challenge")
     {
         git(devops_git, "master")
     }
-    steps{
-        echo "Running the steps1"
-    }
+    
     publishers
     {
         extendedEmail
