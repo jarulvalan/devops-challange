@@ -18,8 +18,8 @@ freeStyleJob("DevOps-Challenge")
         extendedEmail
         {
             recipientList()
-            defalutSubject("Job failed")
-            ddefaultContent("$BUILD_URL")
+            defaultSubject("Job failed")
+            defaultContent("$BUILD_URL")
             triggers
             {
                 aborted
