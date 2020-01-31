@@ -13,7 +13,7 @@ freeStyleJob("DevOps-Challenge")
         git(devops_git, "master")
     }
     steps{
-        sh echo "Running the steps1"
+        echo "Running the steps1"
     }
     publishers
     {
